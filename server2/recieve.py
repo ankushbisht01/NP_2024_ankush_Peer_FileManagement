@@ -1,64 +1,87 @@
-import socket 
-import sys
+import socket
 import os 
-import glob
-import tqdm
+from tqdm import tqdm
 
-def recieve_file(chuck_path: str, host: str, port: int):
+def recieve_file(host: str, port: int):
     # Create a socket object
     s = socket.socket()
-    print(f"Connecting to {host}:{port}")
-    #bind the socket to the address
     s.bind((host, port))
-
-    #listen for connections
     s.listen(5)
+    print(f"Server listening on {host}:{port}")
 
     while True:
-        #accept connections
-        client_socket, client_address = s.accept()
-        print(f"Connected to {host}:{port}")
-        
+        print("Waiting for connection...")
+        conn, addr = s.accept()
+        print(f"Connected by {addr}")
 
-        #get the file name
-        filename = client_socket.recv(1024).decode()
-        client_socket.send("Filename recieved".encode())
+        try:
+            # Receive the file name
+            file_name = conn.recv(1024).decode()
 
-        # chuck_path = os.path.join(chuck_path, filename)
-        chuck_path = filename
+            # Send a response
+            conn.sendall(b"File name received")
+
+            if file_name:
+                #get file from the client
+                file_data = b""
+                print(f"Receiving '{file_name}'...")
+                while True:
+                    bytes_read = conn.recv(1024)
+                    if not bytes_read:
+                        break
+                    file_data += bytes_read
+                with open(file_name, "wb") as file:
+                    file.write(file_data)
+                print(f"Received '{file_name}' successfully.")
+                
+            else:
+                print("No file name received")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+        finally:
+            # Close the connection
+            conn.close()
+            print("Connection closed.")
 
 
-        #send ack 
-        client_socket.send("ACK".encode())
-
-        # Send the file
-        with open(chuck_path, "wb") as file:
-            print(f"Recieving {chuck_path}...")
-            while True:
-                # Read 1024 bytes from the file
-                bytes_read = s.recv(1024)
-                if not bytes_read:
-                    # File transmission is done
-                    break
-                # We use sendall to assure transmission in busy networks
-                file.write(bytes_read)
-        print(f"Recieved {chuck_path}")
-
-        
-        #clear the filename buffer
-        filename = ""
-
-        # Close the socket
-        client_socket.close()
-
-    s.close()
-
+def send_file(conn, filename):
+    try:
+        with open(filename, 'rb') as file:
+            file_data = file.read()
+            conn.sendall(file_data)
+        print(f"Sent '{filename}' to client successfully.")
+    except FileNotFoundError:
+        conn.sendall(b"File not found")
 
 
 def main():
-    PORT = 5051
-    HOST = "127.0.0.1"
-    recieve_file("temp", HOST, PORT)
+    host = '127.0.0.1'
+    port = 5051
+
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((host, port))
+    server_socket.listen(1)
+
+    print(f"Server listening on {host}:{port}...")
+
+    while True:
+        conn, addr = server_socket.accept()
+        print(f"Connected to client: {addr}")
+
+        filename = conn.recv(1024).decode()
+        if filename:
+            print(f"Received request for file: {filename}")
+            send_file(conn, filename)
+
+        conn.close()
+
+def reciever_main():
+    host = '127.0.0.1'
+    port = 5051
+    recieve_file(host, port)
+
 
 if __name__ == "__main__":
     main()

@@ -1,24 +1,17 @@
 from compress import compress, decompress
 from encrypt import encrypt, decrypt
 from split import split_file_into_chunks, combine_chunks
-from send import send_file
+from send import send_file , recieve_file
+from store import store_data
 from tqdm import tqdm
 import os
+import json
+import glob
+
 
 def main():
     filename = "input.wav"
-    data = {
-        "HostName":"127.0.0.1",
-        "Host1" : {
-            "PORT": 5050,
-        },
-        "Host2" : {
-        
-            "HostName":"127.0.0.1",
-            "PORT": 5051,
-        }
-    }
-
+    
     print("[+] Reading file  " , filename )
     with open(filename, "rb") as file:
         data = file.read()
@@ -36,26 +29,59 @@ def main():
     chunks = split_file_into_chunks("compressed.xz")
     print("[+] File splitted into chunks")
     
-    print(chunks[:2])
+    #remove the compressed file if it exists
+    if os.path.exists("compressed.xz"):
+        os.remove("compressed.xz")
 
-    chunk1 = chunks[0]
-    print(os.path.basename(chunk1))
 
 
-    #assign the odd chunks to the second server and even chunk to the first server
-    first_server = []
-    second_server = []
+    store_data(chunks, 2)
 
-    for i in range(len(chunks)):
-        if i % 2 == 0:
-            first_server.append(chunks[i])
-        else:
-            second_server.append(chunks[i])
+    #read the json file
+    with open("data.json", "r") as file:
+        data = file.read()
+
+    data = json.loads(data)
+
+    first_server = data["Host0"]["chunks"]
+    second_server = data["Host1"]["chunks"]
+
+    print(first_server)
 
     send_file(first_server , "127.0.0.1" , 5050)
     send_file(second_server , "127.0.0.1" , 5051)
+
+def get_chunks():
+    with open("data.json", "r") as file:
+        data = file.read()
+
+    data = json.loads(data)
+
+    first_server = data["Host0"]["chunks"]
+    second_server = data["Host1"]["chunks"]
+
+    recieve_file("127.0.0.1" , 5050 , first_server)
+    recieve_file("127.0.0.1" , 5051 , second_server)
+
+    whole_chunks = glob.glob("temp/*")
+    combine_chunks(whole_chunks , "output.xz")
+
+    with open("output.xz" , "rb") as file:
+        data = file.read()
+    decompressed_data = decrypt(data)
+    decompressed_data = decompress(decompressed_data)
+
+    with open("output.wav" , "wb") as file:
+        file.write(decompressed_data)
+
+    if os.path.exists("output.xz"):
+        os.remove("output.xz")
+
+
+    
+    
 if __name__ == "__main__":
-    main()
+    get_chunks()
 
     
 

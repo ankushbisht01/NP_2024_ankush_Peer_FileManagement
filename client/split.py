@@ -11,8 +11,8 @@ def split_file_into_chunks(absolute_path: str):
 
     frame_size = 4 
 
-    # 2 MB chunk size 
-    chunk_size = 2 * 1024         #multiple of 4 bytes as frame size is 4 bytes
+    # 50 MB chunk size 
+    chunk_size = 500 * 1024       
 
     if file_size > chunk_size:
         # Create temp directory if it doesn't exist
