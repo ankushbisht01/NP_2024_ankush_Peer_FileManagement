@@ -12,7 +12,7 @@ def split_file_into_chunks(absolute_path: str):
     frame_size = 4 
 
     # 50 MB chunk size 
-    chunk_size = 500 * 1024       
+    chunk_size = 10*1024*1024     
 
     if file_size > chunk_size:
         # Create temp directory if it doesn't exist
@@ -32,7 +32,7 @@ def split_file_into_chunks(absolute_path: str):
                 # Write the chunk to a file in `temp`
                 chunk_file_path = os.path.join(
                     temp_dir,
-                    f"{os.path.basename(absolute_path)}-{chunk_num}.chunk"
+                    f"{chunk_num}-{os.path.basename(absolute_path)}.chunk"
                 )
                 # print(f"Writing chunk to {chunk_file_path}...")
 

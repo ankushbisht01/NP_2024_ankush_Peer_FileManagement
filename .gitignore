@@ -42,3 +42,22 @@ Thumbs.db
 
 */Data/
 */Output/
+
+
+*.mp4
+*.avi
+*.mov
+*.flv
+*.wmv
+*.mkv
+*.webm
+
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.m4a
+
+*.jpg
+*.jpeg
+*.png

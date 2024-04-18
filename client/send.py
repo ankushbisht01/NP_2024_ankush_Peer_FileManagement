@@ -14,16 +14,22 @@ def send_file(chunks: list, host: str, port: int):
         try:
 
             # Set a timeout for the connection
-            s.settimeout(10)  # 10 seconds timeout
+            s.settimeout(20)  # 10 seconds timeout
             s.connect((host, port))
             # print(f"Connected to {host}:{port}")
+
+            #send command to the server
+            s.send(b"send")
+
+            ack = s.recv(1024).decode()
+
 
             # Send the file name 
             s.sendall(chunk_path.encode())
 
-            # Receive the response
-            response = s.recv(1024).decode()
-            # print(f"Server response: {response}")
+            ack = s.recv(1024).decode()
+
+            print(f"Server response: {ack}")
 
             
             # Send the file
@@ -62,7 +68,17 @@ def recieve_file(host: str, port: int , chunks:list):
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((host, port))
 
+            #send command to the server
+            client_socket.send(b"receive")
+
+            ack = client_socket.recv(1024).decode()
+
+    
+
             client_socket.send(filename.encode())
+            response = client_socket.recv(1024).decode()
+
+            print(f"Server response: {response}")
 
             file_data = b""
             
