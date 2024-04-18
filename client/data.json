@@ -1,0 +1,1 @@
+{"Host0": {"HostIP": "127.0.0.1", "PORT": 5050, "chunks": ["temp\\compressed.xz-0.chunk", "temp\\compressed.xz-2.chunk"]}, "Host1": {"HostIP": "127.0.0.1", "PORT": 5051, "chunks": ["temp\\compressed.xz-1.chunk", "temp\\compressed.xz-3.chunk"]}}
