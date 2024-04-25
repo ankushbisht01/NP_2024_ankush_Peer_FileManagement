@@ -14,7 +14,8 @@ def send_file(chunks: list, host: str, port: int):
         try:
 
             # Set a timeout for the connection
-            s.settimeout(10)  # 10 seconds timeout
+
+            s.settimeout(20)  # 10 seconds timeout
             s.connect((host, port))
             # print(f"Connected to {host}:{port}")
 

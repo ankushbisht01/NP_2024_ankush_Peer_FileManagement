@@ -62,6 +62,8 @@ def send_file(conn, filename):
             file_data = file.read()
             conn.sendall(file_data)
         print(f"Sent '{filename}' to client successfully.")
+        #remove the file after sending
+        os.remove(filename)
     except FileNotFoundError:
         conn.sendall(b"File not found")
 

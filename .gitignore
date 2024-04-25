@@ -40,4 +40,28 @@ Thumbs.db
 *.xy
 
 
+<<<<<<< HEAD
 
+=======
+*/Data/
+*/Output/
+
+
+*.mp4
+*.avi
+*.mov
+*.flv
+*.wmv
+*.mkv
+*.webm
+
+*.mp3
+*.wav
+*.flac
+*.ogg
+*.m4a
+
+*.jpg
+*.jpeg
+*.png
+>>>>>>> 83fec0a4dc0734f5503147d3085d901b263ac641
