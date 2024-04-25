@@ -45,6 +45,17 @@ def recieve_file(host: str, port: int):
             conn.close()
             print("Connection closed.")
 
+
+def receive_file(conn, file_path):
+    with open(file_path, 'wb') as file:
+        while True:
+            bytes_read = conn.recv(1024)
+            if not bytes_read:
+                break
+            file.write(bytes_read)
+
+
+
 def send_file(conn, filename):
     try:
         with open(filename, 'rb') as file:
@@ -55,7 +66,50 @@ def send_file(conn, filename):
         conn.sendall(b"File not found")
 
 
-def main():
+def server_program(host, port):
+    # Create a socket object
+    s = socket.socket()
+    s.bind((host, port))
+    s.listen(1)
+    print(f"Server listening on {host}:{port}")
+
+    
+
+    try:
+        while True:
+            conn, addr = s.accept()
+            print(f"Connected by {addr}")
+            # Receive a command from the client
+            command = conn.recv(1024).decode()
+            print(f"[+]Received command: {command}")
+            #send back ack 
+            conn.sendall(b"Command received")
+
+
+            if command == 'receive':
+                file_path = conn.recv(1024).decode()
+                #send an ack to the client
+                conn.sendall(b"File path received")
+                send_file(conn, file_path)
+
+            elif command == 'send':
+                file_path = conn.recv(1024).decode()
+                conn.sendall(b"File path received")
+                receive_file(conn, file_path)
+
+            elif command == 'quit':
+                break
+
+            else:
+                print(f"Unknown command: {command}")
+            conn.close()
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    
+
+def _main():
     host = '127.0.0.1'
     port = 5050
 
@@ -80,6 +134,12 @@ def reciever_main():
     host = '127.0.0.1'
     port = 5050
     recieve_file(host, port)
+
+def main():
+    host = 'localhost'
+    port = 5050
+    server_program(host, port)
+
 
 
 if __name__ == "__main__":
